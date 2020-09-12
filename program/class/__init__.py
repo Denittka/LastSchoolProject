@@ -1,2 +1,3 @@
-from .Device import Device
-from .Computer import Computer
+from .Bluetooth import *
+from .Remote import *
+from .LAN import *

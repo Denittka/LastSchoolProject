@@ -57,6 +57,10 @@ def get_result(result):
         return "The type of this device has not been found"
     if result == 6:
         return "This name is being used"
+    if result == 7:
+        return "This device is already in bluetooth list"
+    if result == 8:
+        return "This device is not in bluetooth list"
 
 
 def main():

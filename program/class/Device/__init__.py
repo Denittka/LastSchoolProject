@@ -1,21 +1,24 @@
 class Device:
     def __init__(self, name):
         self.name = name
-        self.power = False
-        return 0
+        self.powered = False
 
-    def change_name(self, name):
-        self.name = name
-        return 0
-
-    def power_on(self):
-        if self.power == True:
+    def power_on():
+        if self.powered is True:
             return 3
-        self.power = True
         return 0
 
-    def power_off(self):
-        if self.power == False:
+    def power_off():
+        if self.powered is False:
             return 4
-        self.power = False
         return 0
+
+    def send():
+        pass
+
+    def receive():
+        pass
+
+    def deice():
+        pass
+
