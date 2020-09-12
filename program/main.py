@@ -61,6 +61,14 @@ def get_result(result):
         return "This device is already in bluetooth list"
     if result == 8:
         return "This device is not in bluetooth list"
+    if result == 9:
+        return "This device is already in remote list"
+    if result == 10:
+        return "This device is not in remote list"
+    if result == 11:
+        return "This device is already in LAN list"
+    if result == 12:
+        return "This device is not in LAN list"
 
 
 def main():
