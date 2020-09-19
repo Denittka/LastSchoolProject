@@ -58,17 +58,19 @@ def get_result(result):
     if result == 6:
         return "This name is being used"
     if result == 7:
-        return "This device is already in bluetooth list"
+        return "This device has already been connected"
     if result == 8:
-        return "This device is not in bluetooth list"
+        return "This device has already been disconnected"
     if result == 9:
-        return "This device is already in remote list"
+        return "The number must be int type"
     if result == 10:
-        return "This device is not in remote list"
+        return "The number must be greater than or equal to zero"
     if result == 11:
-        return "This device is already in LAN list"
+        return "The limit of connections has already been reached"
     if result == 12:
-        return "This device is not in LAN list"
+        return "The number of connected devices is greater than the limit you are trying to set"
+    if result == 13:
+        return "The device has not been found"
 
 
 def main():
