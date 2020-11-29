@@ -5,6 +5,7 @@ class Device:
     def __init__(self, name):
         self.name = name
         self.powered = False
+        self.vulnerabilities = []
 
     def power_on(self):
         """
