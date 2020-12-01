@@ -2,10 +2,16 @@ class Device:
     """
     Базовый класс для всех устройств.
     """
-    def __init__(self, name):
-        self.name = name
+    def __init__(self):
+        self.name = None
         self.powered = False
         self.vulnerabilities = []
+
+    def set_name(self, name):
+        if self.name == name:
+            return 8
+        self.name = name
+        return 0
 
     def power_on(self):
         """
