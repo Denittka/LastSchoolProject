@@ -6,30 +6,33 @@ class Bluetooth:
         self.bluetooth_connected = []
         self.bluetooth_connection_limit = None
 
-    def bluetooth_connect(self, name: str):
+    def bluetooth_connect(self, device):
         """
         Подключает указанное устройство к текущему.
-        :param name: имя подключаемого устройства
+        :param device: имя подключаемого устройства
         :return: код ошибки
         """
-        if self.bluetooth_connection_limit is None:
+        if self.bluetooth_connection_limit is None or device.bluetooth_connection_limit is None:
             return 6
-        if self.bluetooth_connection_limit == len(self.bluetooth_connected):
+        if self.bluetooth_connection_limit == len(self.bluetooth_connected)\
+                or device.bluetooth_connection_limit == len(device.bluetooth_connected):
             return 7
-        if name in self.bluetooth_connected:
+        if device in self.bluetooth_connected:
             return 5
-        self.bluetooth_connected += [name]
+        self.bluetooth_connected += [device]
+        device.bluetooth_connected += [self]
         return 0
 
-    def bluetooth_disconnect(self, name: str):
+    def bluetooth_disconnect(self, device):
         """
         Отключает указанное устройство от текущего.
-        :param name: имя отключаемого устройства
+        :param device: имя отключаемого устройства
         :return: код ошибки
         """
-        if name not in self.bluetooth_connected:
+        if device not in self.bluetooth_connected:
             return 4
-        del self.bluetooth_connected[self.bluetooth_connected.index(name)]
+        del self.bluetooth_connected[self.bluetooth_connected.index(device)]
+        del device.bluetooth_connected[device.bluetooth_connected.index(self)]
         return 0
 
     def bluetooth_set_limit(self, num: int):

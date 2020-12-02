@@ -18,28 +18,31 @@ class USB:
         self.usb_connection_limit = num
         return 0
 
-    def usb_connect(self, name: str):
+    def usb_connect(self, device):
         """
         Подключает устройство.
-        :param name: имя устройства
+        :param device: имя устройства
         :return: код ошибки
         """
-        if self.usb_connection_limit is None:
+        if self.usb_connection_limit is None or device.usb_connection_limit is None:
             return 6
-        if self.usb_connection_limit == len(self.usb_connected):
+        if self.usb_connection_limit == len(self.usb_connected)\
+                or device.usb_connection_limit == len(device.usb_connected):
             return 7
-        if name in self.usb_connected:
+        if device in self.usb_connected:
             return 5
-        self.usb_connected += [name]
+        self.usb_connected += [device]
+        device.usb_connected += [self]
         return 0
 
-    def usb_disconnect(self, name: str):
+    def usb_disconnect(self, device):
         """
         Отключает устройство
-        :param name: имя устройства
+        :param device: имя устройства
         :return: код ошибки
         """
-        if name not in self.usb_connected:
+        if device not in self.usb_connected:
             return 4
-        del self.usb_connected[self.usb_connected.index(name)]
+        del self.usb_connected[self.usb_connected.index(device)]
+        del device.usb_connected[device.usb_connected.index(self)]
         return 0

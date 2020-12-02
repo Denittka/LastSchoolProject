@@ -16,9 +16,3 @@ class Laptop(Device, Bluetooth, Remote, LAN, USB):
         self.remote_connection_limit = None
         self.local_connected = []
         self.local_connection_limit = None
-
-    def send(self):
-        pass  # TODO
-
-    def receive(self):
-        pass  # TODO

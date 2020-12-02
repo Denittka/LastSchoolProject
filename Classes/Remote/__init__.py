@@ -18,28 +18,31 @@ class Remote:
         self.remote_connection_limit = num
         return 0
 
-    def remote_connect(self, name: str):
+    def remote_connect(self, device):
         """
         Подключает устройство.
-        :param name: имя устройства
+        :param device: имя устройства
         :return: код ошибки
         """
-        if self.remote_connection_limit is None:
+        if self.remote_connection_limit is None or device.remote_connection_limit is None:
             return 6
-        if self.remote_connection_limit == len(self.remote_connected):
+        if self.remote_connection_limit == len(self.remote_connected) \
+                or device.remote_connection_limit == len(device.remote_connected):
             return 7
-        if name in self.remote_connected:
+        if device in self.remote_connected:
             return 5
-        self.remote_connected += [name]
+        self.remote_connected += [device]
+        device.remote_connected += [self]
         return 0
 
-    def remote_disconnect(self, name: str):
+    def remote_disconnect(self, device):
         """
         Отключает устройство
-        :param name: имя устройства
+        :param device: имя устройства
         :return: код ошибки
         """
-        if name not in self.remote_connected:
+        if device not in self.remote_connected:
             return 4
-        del self.remote_connected[self.remote_connected.index(name)]
+        del self.remote_connected[self.remote_connected.index(device)]
+        del device.remote_connected[device.remote_connected.index(self)]
         return 0

@@ -17,28 +17,31 @@ class LAN:
         self.local_connection_limit = num
         return 0
 
-    def local_connect(self, name: str):
+    def local_connect(self, device):
         """
         Подключение устройства.
-        :param name: имя устройтсва
+        :param device: имя устройтсва
         :return: код ошибки
         """
-        if self.local_connection_limit is None:
+        if self.local_connection_limit is None or device.local_connection_limit is None:
             return 6
-        if self.local_connection_limit == len(self.local_connected):
+        if self.local_connection_limit == len(self.local_connected)\
+                or device.local_connection_limit == len(device.local_connected):
             return 7
-        if name in self.local_connected:
+        if device in self.local_connected:
             return 5
-        self.local_connected += [name]
+        self.local_connected += [device]
+        device.local_connected += [self]
         return 0
 
-    def local_disconnect(self, name: str):
+    def local_disconnect(self, device):
         """
         Отключение устройства.
-        :param name: имя устройства
+        :param device: имя устройства
         :return: код ошибки
         """
-        if name not in self.local_connected:
+        if device not in self.local_connected:
             return 4
-        del self.local_connected[self.local_connected.index(name)]
+        del self.local_connected[self.local_connected.index(device)]
+        del device.local_connected[device.local_connected.index(self)]
         return 0

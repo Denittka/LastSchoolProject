@@ -33,22 +33,39 @@ def init_table(table_name):
         new_device.name = device[2]
         if type(new_device) in [Computer, Server, Phone, Laptop]:
             new_device.usb_connected = device[5].split(", ")
+            if new_device.usb_connected[0] == "":
+                new_device.usb_connected = []
             if device[10] != "":
                 new_device.usb_connection_limit = int(device[10])
         if type(new_device) in [Computer, Router, Server, Laptop]:
             new_device.local_connected = device[3].split(", ")
+            if new_device.local_connected[0] == "":
+                new_device.local_connected = []
             if device[8] != "":
                 new_device.local_connection_limit = int(device[8])
         if type(new_device) in [Router, Laptop, Phone, TV]:
             new_device.remote_connected = device[4].split(", ")
+            if new_device.remote_connected[0] == "":
+                new_device.remote_connected = []
             if device[9] != "":
                 new_device.remote_connection_limit = int(device[9])
         if type(new_device) in [Laptop, Phone, TV]:
             new_device.bluetooth_connected = device[6].split(", ")
+            if new_device.bluetooth_connected[0] == "":
+                new_device.bluetooth_connected = []
             if device[11] != "":
                 new_device.bluetooth_connection_limit = int(device[11])
         new_device.vulnerabilities = device[7].split(", ")
         environment += [new_device]
+    for device in environment:
+        if type(device) in [Computer, Server, Phone, Laptop]:
+            device.usb_connected = [get_device(name) for name in device.usb_connected]
+        if type(device) in [Computer, Router, Server, Laptop]:
+            device.local_connected = [get_device(name) for name in device.local_connected]
+        if type(device) in [Router, Laptop, Phone, TV]:
+            device.remote_connected = [get_device(name) for name in device.remote_connected]
+        if type(device) in [Laptop, Phone, TV]:
+            device.bluetooth_connected = [get_device(name) for name in device.bluetooth_connected]
 
 
 def exit_program():
@@ -72,25 +89,25 @@ def exit_program():
             else:
                 return 11
             if type(device) in [Computer, Laptop, Phone, Server]:
-                device_usb = ", ".join(device.usb_connected)
+                device_usb = ", ".join([conn_device.name for conn_device in device.usb_connected])
                 if device.usb_connection_limit is not None:
                     device_usb_limit = device.usb_connection_limit
             else:
                 device_usb = ""
             if type(device) in [Computer, Laptop, Server, Router]:
-                device_lan = ", ".join(device.local_connected)
+                device_lan = ", ".join([conn_device.name for conn_device in device.local_connected])
                 if device.local_connection_limit is not None:
                     device_lan_limit = device.local_connection_limit
             else:
                 device_lan = ""
             if type(device) in [Laptop, Router, Phone, TV]:
-                device_remote = ", ".join(device.remote_connected)
+                device_remote = ", ".join([conn_device.name for conn_device in device.remote_connected])
                 if device.remote_connection_limit is not None:
                     device_remote_limit = device.remote_connection_limit
             else:
                 device_remote = ""
             if type(device) in [Phone, Laptop, TV]:
-                device_bluetooth = ", ".join(device.bluetooth_connected)
+                device_bluetooth = ", ".join([conn_device.name for conn_device in device.bluetooth_connected])
                 if device.bluetooth_connection_limit is not None:
                     device_bluetooth_limit = device.bluetooth_connection_limit
             else:
@@ -248,19 +265,19 @@ def print_devices():
         else:
             return 11
         if type(device) in [Computer, Laptop, Phone, Server]:
-            device_usb = ", ".join(device.usb_connected)
+            device_usb = ", ".join([conn_device.name for conn_device in device.usb_connected])
         else:
             device_usb = ""
         if type(device) in [Computer, Laptop, Server, Router]:
-            device_lan = ", ".join(device.local_connected)
+            device_lan = ", ".join([conn_device.name for conn_device in device.local_connected])
         else:
             device_lan = ""
         if type(device) in [Laptop, Router, Phone, TV]:
-            device_remote = ", ".join(device.remote_connected)
+            device_remote = ", ".join([conn_device.name for conn_device in device.remote_connected])
         else:
             device_remote = ""
         if type(device) in [Phone, Laptop, TV]:
-            device_bluetooth = ", ".join(device.bluetooth_connected)
+            device_bluetooth = ", ".join([conn_device.name for conn_device in device.bluetooth_connected])
         else:
             device_bluetooth = ""
         device_vulnerabilities = ", ".join(device.vulnerabilities)
@@ -325,7 +342,7 @@ def choose_option():
             open_record()
             break
         else:
-            pass  # TODO
+            return 13
 
 
 def get_result(code):
@@ -359,6 +376,37 @@ def get_result(code):
         return "Опция не найдена"
     elif code == 14:
         return "Неверная опция"
+    elif code == 15:
+        return "Неверный тип устройства"
+
+
+def connect(device):
+    if len(device) < 3:
+        return 10
+    if not check_name(device[1]) and check_name(device[2]):
+        return 12
+    to_connect = get_device(device[1])
+    connecting = get_device(device[2])
+    if device[0] == "usb":
+        if type(to_connect) not in [Computer, Laptop, Phone, Server] \
+                and type(connecting) not in [Computer, Laptop, Phone, Server]:
+            return 15
+        return to_connect.usb_connect(device[2])
+    if device[0] == "lan":
+        if type(to_connect) not in [Computer, Router, Server, Laptop] \
+                and type(connecting) not in [Computer, Router, Server, Laptop]:
+            return 15
+        return to_connect.local_connect(device[2])
+    if device[0] == "bluetooth":
+        if type(to_connect) not in [Phone, Laptop, TV] \
+                and type(connecting) not in [Phone, Laptop, TV]:
+            return 15
+        return to_connect.bluetooth_connect(device[2])
+    if device[0] == "remote":
+        if type(to_connect) not in [Router, Phone, TV, Laptop] \
+                and type(connecting) not in [Router, Phone, TV, Laptop]:
+            return 15
+        return to_connect.remote_connect(device[2])
 
 
 if __name__ == "__main__":
@@ -390,5 +438,7 @@ if __name__ == "__main__":
                 print_devices()
         elif command[0] == "set":
             print(get_result(configure(command[1:])))
+        elif command[0] == "connect":
+            print(get_result(connect(command[1:])))
         else:
             print("Команда не найдена")
