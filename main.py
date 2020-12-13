@@ -391,22 +391,51 @@ def connect(device):
         if type(to_connect) not in [Computer, Laptop, Phone, Server] \
                 and type(connecting) not in [Computer, Laptop, Phone, Server]:
             return 15
-        return to_connect.usb_connect(device[2])
+        return to_connect.usb_connect(get_device(device[2]))
     if device[0] == "lan":
         if type(to_connect) not in [Computer, Router, Server, Laptop] \
                 and type(connecting) not in [Computer, Router, Server, Laptop]:
             return 15
-        return to_connect.local_connect(device[2])
+        return to_connect.local_connect(get_device(device[2]))
     if device[0] == "bluetooth":
         if type(to_connect) not in [Phone, Laptop, TV] \
                 and type(connecting) not in [Phone, Laptop, TV]:
             return 15
-        return to_connect.bluetooth_connect(device[2])
+        return to_connect.bluetooth_connect(get_device(device[2]))
     if device[0] == "remote":
         if type(to_connect) not in [Router, Phone, TV, Laptop] \
                 and type(connecting) not in [Router, Phone, TV, Laptop]:
             return 15
-        return to_connect.remote_connect(device[2])
+        return to_connect.remote_connect(get_device(device[2]))
+
+
+def disconnect(device):
+    if len(device) < 3:
+        return 10
+    if not check_name(device[1]) and check_name(device[2]):
+        return 12
+    to_connect = get_device(device[1])
+    connecting = get_device(device[2])
+    if device[0] == "usb":
+        if type(to_connect) not in [Computer, Laptop, Phone, Server] \
+                and type(connecting) not in [Computer, Laptop, Phone, Server]:
+            return 15
+        return to_connect.usb_disconnect(connecting)
+    if device[0] == "lan":
+        if type(to_connect) not in [Computer, Router, Server, Laptop] \
+                and type(connecting) not in [Computer, Router, Server, Laptop]:
+            return 15
+        return to_connect.local_disconnect(connecting)
+    if device[0] == "bluetooth":
+        if type(to_connect) not in [Phone, Laptop, TV] \
+                and type(connecting) not in [Phone, Laptop, TV]:
+            return 15
+        return to_connect.bluetooth_disconnect(connecting)
+    if device[0] == "remote":
+        if type(to_connect) not in [Router, Phone, TV, Laptop] \
+                and type(connecting) not in [Router, Phone, TV, Laptop]:
+            return 15
+        return to_connect.remote_disconnect(connecting)
 
 
 if __name__ == "__main__":
@@ -440,5 +469,7 @@ if __name__ == "__main__":
             print(get_result(configure(command[1:])))
         elif command[0] == "connect":
             print(get_result(connect(command[1:])))
+        elif command[0] == "disconnect":
+            print(get_result(disconnect(command[1:])))
         else:
             print("Команда не найдена")
