@@ -33,8 +33,11 @@ class Device:
         self.powered = False
         return 0
 
-    def send(self):
+    def send(self, to_address, data):
         pass
 
-    def receive(self):
+    def receive(self, from_address, packet):
+        pass
+
+    def do(self, command):
         pass
