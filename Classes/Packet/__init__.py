@@ -3,5 +3,8 @@ class Packet:
         self.to_address = to_address
         self.from_address = from_address
         self.data = data
-        self.last_address = from_address
         self.trace = []
+
+    def add_to_trace(self, address):
+        self.trace += [address]
+

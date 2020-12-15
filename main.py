@@ -378,6 +378,8 @@ def get_result(code):
         return "Неверная опция"
     elif code == 15:
         return "Неверный тип устройства"
+    elif code == 16:
+        return "Устройство уже находилось в пути"
 
 
 def connect(device):
@@ -438,6 +440,11 @@ def disconnect(device):
         return to_connect.remote_disconnect(connecting)
 
 
+def trace(devices):
+    from_device = get_device(devices[0])
+    return from_device.send(devices[1], data="print trace")[0]
+
+
 if __name__ == "__main__":
     if "db.sqlite" not in os.listdir("."):
         open("db.sqlite", "w")
@@ -471,5 +478,7 @@ if __name__ == "__main__":
             print(get_result(connect(command[1:])))
         elif command[0] == "disconnect":
             print(get_result(disconnect(command[1:])))
+        elif command[0] == "trace":
+            print(get_result(trace(command[1:])))
         else:
             print("Команда не найдена")
