@@ -37,7 +37,12 @@ class Device:
         pass
 
     def receive(self, from_address, packet):
-        pass
+        if packet.to_address == self.name:
+            return [self.do(packet.data, packet), packet]
+        if self.name in packet.trace:
+            return [16, packet]
+        packet.add_to_trace(self.name)
+        return self.send(packet.to_address, packet=packet)
 
     def do(self, command):
         pass

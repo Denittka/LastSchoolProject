@@ -25,7 +25,15 @@ class Computer(Device, LAN, USB):
                 sent = sent + packet.trace.copy()
                 continue
             return result
-
+"""
+    def receive(self, from_address, packet):
+        if packet.to_address == self.name:
+            return [self.do(packet.data, packet), packet]
+        if self.name in packet.trace:
+            return [16, packet]
+        packet.add_to_trace(self.name)
+        return self.send(packet.to_address, packet=packet)
+"""
     def do(self, command, packet):
         command = command.split()
         if " ".join(command) == "print trace":

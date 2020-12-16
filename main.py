@@ -441,6 +441,10 @@ def disconnect(device):
 
 
 def trace(devices):
+    if len(devices) < 2:
+        return 12
+    if not check_name(devices[0]) and not check_name(devices[1]):
+        return 12
     from_device = get_device(devices[0])
     return from_device.send(devices[1], data="print trace")[0]
 
