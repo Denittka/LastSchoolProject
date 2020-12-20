@@ -60,6 +60,9 @@ def init_table(table_name):
             new_device_vulnerabilities = []
         for vulnerability in new_device_vulnerabilities:
             new_device.set_vulnerability(vulnerability.lower())
+            if vulnerability == "RemoteControl":
+                for allowed_device in device[12].split(", "):
+                    new_device.vulnerabilities[-1].add_device(allowed_device)
         environment += [new_device]
     for device in environment:
         if type(device) in [Computer, Server, Phone, Laptop]:
@@ -117,11 +120,17 @@ def exit_program():
             else:
                 device_bluetooth = ""
             device_vulnerabilities = ", ".join([vulnerability.name for vulnerability in device.vulnerabilities])
+            if "RemoteControl" in device_vulnerabilities:
+                control = device.vulnerabilities[device_vulnerabilities.index("RemoteControl")]
+                device_allowed = ", ".join(control.allowed)
+            else:
+                device_allowed = ""
             sql = """INSERT INTO {}(device, name, usb, lan, remote, bluetooth, vulnerabilities, usb_limit, lan_limit,
-            remote_limit, bluetooth_limit)
-            VALUES(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\");""".format(
-                NAME, device_type, device.name, device_usb, device_lan, device_remote, device_bluetooth,
-                device_vulnerabilities, device_usb_limit, device_lan_limit, device_remote_limit, device_bluetooth_limit)
+            remote_limit, bluetooth_limit, allowed)
+            VALUES(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\",
+            \"{}\");""".format(NAME, device_type, device.name, device_usb, device_lan, device_remote, device_bluetooth,
+                               device_vulnerabilities, device_usb_limit, device_lan_limit, device_remote_limit,
+                               device_bluetooth_limit, device_allowed)
             cur.execute(sql)
 
 
@@ -178,7 +187,7 @@ def create_record():
                 cur.execute(f"""CREATE TABLE {NAME} (\
                 ID INTEGER, device VARCHAR, name VARCHAR, LAN VARCHAR, Remote VARCHAR, USB VARCHAR, Bluetooth VARCHAR,\
                 vulnerabilities VARCHAR, LAN_limit INTEGER, Remote_limit INTEGER, USB_limit INTEGER,\
-                Bluetooth_limit INTEGER, PRIMARY KEY(ID));""")
+                Bluetooth_limit INTEGER, allowed VARCHAR, PRIMARY KEY(ID));""")
                 break
             except sqlite3.OperationalError:
                 print("Что-то пошло не так. Видимо, такое имя записи уже занято.")
@@ -256,43 +265,50 @@ def print_devices():
     for device in environment:
         if isinstance(device, Computer):
             device_type = "computer"
+            device_usb = ", ".join([conn_device.name for conn_device in device.usb_connected])
+            device_lan = ", ".join([conn_device.name for conn_device in device.local_connected])
         elif isinstance(device, Laptop):
             device_type = "laptop"
+            device_usb = ", ".join([conn_device.name for conn_device in device.usb_connected])
+            device_lan = ", ".join([conn_device.name for conn_device in device.local_connected])
+            device_remote = ", ".join([conn_device.name for conn_device in device.remote_connected])
+            device_bluetooth = ", ".join([conn_device.name for conn_device in device.bluetooth_connected])
         elif isinstance(device, Phone):
             device_type = "phone"
+            device_usb = ", ".join([conn_device.name for conn_device in device.usb_connected])
+            device_remote = ", ".join([conn_device.name for conn_device in device.remote_connected])
+            device_bluetooth = ", ".join([conn_device.name for conn_device in device.bluetooth_connected])
         elif isinstance(device, Router):
             device_type = "router"
+            device_lan = ", ".join([conn_device.name for conn_device in device.local_connected])
+            device_remote = ", ".join([conn_device.name for conn_device in device.remote_connected])
         elif isinstance(device, Server):
             device_type = "server"
+            device_usb = ", ".join([conn_device.name for conn_device in device.usb_connected])
+            device_lan = ", ".join([conn_device.name for conn_device in device.local_connected])
         elif isinstance(device, TV):
             device_type = "tv"
-        else:
-            return 11
-        if type(device) in [Computer, Laptop, Phone, Server]:
-            device_usb = ", ".join([conn_device.name for conn_device in device.usb_connected])
-        else:
-            device_usb = ""
-        if type(device) in [Computer, Laptop, Server, Router]:
-            device_lan = ", ".join([conn_device.name for conn_device in device.local_connected])
-        else:
-            device_lan = ""
-        if type(device) in [Laptop, Router, Phone, TV]:
             device_remote = ", ".join([conn_device.name for conn_device in device.remote_connected])
-        else:
-            device_remote = ""
-        if type(device) in [Phone, Laptop, TV]:
             device_bluetooth = ", ".join([conn_device.name for conn_device in device.bluetooth_connected])
         else:
-            device_bluetooth = ""
-        device_vulnerabilities = ", ".join([vulnerability.name for vulnerability in device.vulnerabilities])
+            return 11
         print("------------------------------------")
         print(f"Type: {device_type}")
         print(f"Name: {device.name}")
-        print(f"USB connected: {device_usb}")
-        print(f"LAN connected: {device_lan}")
-        print(f"Remote connected: {device_remote}")
-        print(f"Bluetooth connected: {device_bluetooth}")
+        if type(device) in [Computer, Laptop, Phone, Server]:
+            print(f"USB connected: {device_usb}")
+        if type(device) in [Computer, Laptop, Server, Router]:
+            print(f"LAN connected: {device_lan}")
+        if type(device) in [Laptop, Router, Phone, TV]:
+            print(f"Remote connected: {device_remote}")
+        if type(device) in [Phone, Laptop, TV]:
+            print(f"Bluetooth connected: {device_bluetooth}")
+        device_vulnerabilities = ", ".join([vulnerability.name for vulnerability in device.vulnerabilities])
         print(f"Vulnerabilities: {device_vulnerabilities}")
+        if "RemoteControl" in device_vulnerabilities:
+            control = device.vulnerabilities[device_vulnerabilities.index("RemoteControl")]
+            print(f"Allowed devices: {', '.join(control.allowed)}")
+
         print("------------------------------------")
 
 
@@ -312,7 +328,7 @@ def configure(set_device):
         if check_name(set_device[2]):
             return 9
         return cur_device.set_name(set_device[2])
-    elif set_device[1] in "vulnerability":
+    elif set_device[1] == "vulnerability":
         if len(set_device) < 4:
             return 10
         if set_device[2] == "add":
@@ -321,6 +337,19 @@ def configure(set_device):
             return cur_device.del_vulnerability(set_device[3])
         else:
             return 13
+    elif set_device[1] == "allowed":
+        if len(set_device) < 4:
+            return 10
+        if "RemoteControl" not in [vulnerability.name for vulnerability in cur_device.vulnerabilities]:
+            return 14
+        if not check_name(set_device[3]):
+            return 9
+        control = cur_device.vulnerabilities[[v.name for v in cur_device.vulnerabilities].index("RemoteControl")]
+        if set_device[2] == "add":
+            return control.add_device(set_device[3])
+        if set_device[2] == "del":
+            return control.del_device(set_device[3])
+        return 13
     elif set_device[1] in ["usb", "lan", "bluetooth", "remote"]:
         if len(set_device) < 4:
             return 10
@@ -393,6 +422,8 @@ def get_result(code):
         return "Неверный тип устройства"
     elif code == 16:
         return "Устройство уже находилось в пути пакета"
+    elif code == 17:
+        return "Отказано в доступе"
 
 
 def connect(device):

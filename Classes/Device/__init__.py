@@ -28,13 +28,15 @@ class Device:
             return 13
         if str(type(self)).split(".")[-1][:-2] not in vulnerability.devices:
             return 14
+        if vulnerability.name.lower() in [v.name.lower() for v in self.vulnerabilities]:
+            return 14
         self.vulnerabilities += [vulnerability]
         return 0
 
     def del_vulnerability(self, vulnerability):
-        if vulnerability not in self.vulnerabilities:
+        if vulnerability.lower() not in [v.name.lower() for v in self.vulnerabilities]:
             return 14
-        del self.vulnerabilities[self.vulnerabilities.index(vulnerbility)]
+        del self.vulnerabilities[[v.name.lower() for v in self.vulnerabilities].index(vulnerability)]
         return 0
 
     def set_name(self, name):
@@ -63,12 +65,17 @@ class Device:
         self.powered = False
         return 0
 
-    def send(self, to_address, data, packet=None):
+    def send(self, to_address, data=None, packet=None):
         pass
 
     def receive(self, from_address, packet):
         if packet.to_address == self.name:
-            return [self.do(packet.data, packet), packet]
+            if "RemoteControl" in [vulnerability.name for vulnerability in self.vulnerabilities]:
+                cur = self.vulnerabilities[[v.name for v in self.vulnerabilities].index("RemoteControl")]
+                if packet.from_address in cur.allowed:
+                    return [self.do(packet.data, packet), packet]
+                return 17
+            return 17
         if self.name in packet.trace:
             return [16, packet]
         packet.add_to_trace(self.name)
