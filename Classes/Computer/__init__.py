@@ -25,12 +25,3 @@ class Computer(Device, LAN, USB):
                 sent = sent + packet.trace.copy()
                 continue
             return result
-
-    def do(self, command, packet):
-        command = command.split()
-        if " ".join(command) == "print trace":
-            for num, device in enumerate(packet.trace):
-                print(f"{num}. {device}")
-            return 0
-        if command[0] == "send":
-            pass  # TODO

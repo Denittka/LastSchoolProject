@@ -59,7 +59,7 @@ def init_table(table_name):
         if new_device_vulnerabilities[0].strip() == "":
             new_device_vulnerabilities = []
         for vulnerability in new_device_vulnerabilities:
-            new_device.set_vulnerability(vulnerability)
+            new_device.set_vulnerability(vulnerability.lower())
         environment += [new_device]
     for device in environment:
         if type(device) in [Computer, Server, Phone, Laptop]:

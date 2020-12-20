@@ -63,7 +63,7 @@ class Device:
         self.powered = False
         return 0
 
-    def send(self, to_address, data):
+    def send(self, to_address, data, packet=None):
         pass
 
     def receive(self, from_address, packet):
@@ -73,3 +73,12 @@ class Device:
             return [16, packet]
         packet.add_to_trace(self.name)
         return self.send(packet.to_address, packet=packet)
+
+    def do(self, command, packet):
+        command = command.split()
+        if " ".join(command) == "print trace":
+            for num, device in enumerate(packet.trace):
+                print(f"{num}. {device}")
+            return 0
+        if command[0] == "send":
+            pass  # TODO
