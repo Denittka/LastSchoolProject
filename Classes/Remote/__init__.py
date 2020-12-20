@@ -24,10 +24,9 @@ class Remote:
         :param device: имя устройства
         :return: код ошибки
         """
-        if self.remote_connection_limit is None or device.remote_connection_limit is None:
-            return 6
-        if self.remote_connection_limit == len(self.remote_connected) \
-                or device.remote_connection_limit == len(device.remote_connected):
+        if self.remote_connection_limit is not None and self.remote_connection_limit == len(self.remote_connected) \
+                or device.remote_connection_limit is not None \
+                and device.remote_connection_limit == len(device.remote_connected):
             return 7
         if device in self.remote_connected:
             return 5

@@ -25,3 +25,4 @@ class Computer(Device, LAN, USB):
                 sent = sent + packet.trace.copy()
                 continue
             return result
+        return [16, packet]

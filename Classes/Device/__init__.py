@@ -3,8 +3,6 @@ from ..Vulnerabilities.Criticalerror import CriticalError
 from ..Vulnerabilities.Phpinjection import PHPInjection
 from ..Vulnerabilities.Sqlinjection import SQLInjection
 
-from ..Packet import Packet
-
 
 class Device:
     """
@@ -70,12 +68,7 @@ class Device:
 
     def receive(self, from_address, packet):
         if packet.to_address == self.name:
-            if "RemoteControl" in [vulnerability.name for vulnerability in self.vulnerabilities]:
-                cur = self.vulnerabilities[[v.name for v in self.vulnerabilities].index("RemoteControl")]
-                if packet.from_address in cur.allowed:
-                    return [self.do(packet.data, packet), packet]
-                return 17
-            return 17
+            return [self.do(packet.data, packet), packet]
         if self.name in packet.trace:
             return [16, packet]
         packet.add_to_trace(self.name)
@@ -83,9 +76,16 @@ class Device:
 
     def do(self, command, packet):
         command = command.split()
-        if " ".join(command) == "print trace":
-            for num, device in enumerate(packet.trace):
-                print(f"{num}. {device}")
-            return 0
+        if command[0] == "print":
+            if command[1] == "trace":
+                for num, device in enumerate(packet.trace):
+                    print(f"{num}. {device}")
+                return 0
+            else:
+                print(" ".join(command[1:]))
         if command[0] == "send":
-            pass  # TODO
+            if command[2] == "type":
+                result = str(type(self)).split(".")[-1][:-2]
+            else:
+                return 13
+            return self.send(command[1], data=f"print {result}")

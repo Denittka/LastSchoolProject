@@ -12,10 +12,10 @@ class Bluetooth:
         :param device: имя подключаемого устройства
         :return: код ошибки
         """
-        if self.bluetooth_connection_limit is None or device.bluetooth_connection_limit is None:
-            return 6
-        if self.bluetooth_connection_limit == len(self.bluetooth_connected)\
-                or device.bluetooth_connection_limit == len(device.bluetooth_connected):
+        if self.bluetooth_connection_limit is not None \
+                and self.bluetooth_connection_limit == len(self.bluetooth_connected) \
+                or device.bluetooth_connection_limit is not None \
+                and device.bluetooth_connection_limit == len(device.bluetooth_connected):
             return 7
         if device in self.bluetooth_connected:
             return 5

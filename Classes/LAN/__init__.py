@@ -23,10 +23,9 @@ class LAN:
         :param device: имя устройтсва
         :return: код ошибки
         """
-        if self.local_connection_limit is None or device.local_connection_limit is None:
-            return 6
-        if self.local_connection_limit == len(self.local_connected)\
-                or device.local_connection_limit == len(device.local_connected):
+        if self.local_connection_limit is not None and self.local_connection_limit == len(self.local_connected) \
+                or device.local_connection_limit is not None \
+                and device.local_connection_limit == len(device.local_connected):
             return 7
         if device in self.local_connected:
             return 5

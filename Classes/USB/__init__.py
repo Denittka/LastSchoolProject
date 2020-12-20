@@ -24,10 +24,10 @@ class USB:
         :param device: имя устройства
         :return: код ошибки
         """
-        if self.usb_connection_limit is None or device.usb_connection_limit is None:
+        if self.usb_connection_limit is not None or device.usb_connection_limit is not None:
             return 6
-        if self.usb_connection_limit == len(self.usb_connected)\
-                or device.usb_connection_limit == len(device.usb_connected):
+        if self.usb_connection_limit is not None and self.usb_connection_limit == len(self.usb_connected)\
+                or device.usb_connection_limit is not None and device.usb_connection_limit == len(device.usb_connected):
             return 7
         if device in self.usb_connected:
             return 5

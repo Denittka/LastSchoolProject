@@ -8,6 +8,55 @@ from Classes.TV import TV
 import sqlite3
 
 
+def analyze():
+    while device := input("Выберите точку старта: > "):
+        if check_name(device):
+            device = get_device(device)
+            break
+        print("Нет устройства с таким именем")
+    net = []
+    print("Анализ сети")
+    print("----------------------------------")
+    for testing_device in environment:
+        print("Тестирование устройства", testing_device.name)
+        if testing_device.name == device.name or testing_device.name in net:
+            print("Статус: подключено")
+            continue
+        result = device.send(testing_device.name, data=f"send {device.name} type")
+        for to_add_device in result[1].trace[1:]:
+            if to_add_device not in net:
+                net += [to_add_device]
+        print("Статус: подключено" if result[0] == 0 else "Статус: не подключено")
+    print("----------------------------------")
+    allowed = check_allowed(device, net)
+    print(allowed)
+    # if type(device) in [Computer, Laptop, Router, Server]:
+    #     for device in self.local_connected
+    # if type(device) in [Computer, Phone, Server]:
+    #     pass  # TODO USB
+    # if type(device) in [Laptop, Phone, Router, TV]
+    #     pass  # TODO Remote
+    # if type(device) in [Laptop, Phone, TV]:
+    #     pass  # TODO Bluetooth
+    return 0
+
+
+def check_allowed(device, net):
+    allowed = []
+    for testing_device in net:
+        testing_device = get_device(testing_device)
+        if "RemoteControl" in [v.name for v in testing_device.vulnerabilities]:
+            ct = testing_device.vulnerabilities[[v.name for v in testing_device.vulnerabilities].index("RemoteControl")]
+            if device.name in ct.allowed:
+                allowed += [testing_device]
+    for testing_device in allowed:
+        to_check = [x for x in net if x not in allowed]
+        result = check_allowed(testing_device, to_check)
+        for new_device in result:
+            allowed += [new_device]
+    return allowed
+
+
 def init_table(table_name):
     global NAME
     NAME = table_name
@@ -528,5 +577,7 @@ if __name__ == "__main__":
             print(get_result(disconnect(command[1:])))
         elif command[0] == "trace":
             print(get_result(trace(command[1:])))
+        elif command[0] == "analyze":
+            print(get_result(analyze()))
         else:
             print("Команда не найдена")
