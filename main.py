@@ -55,7 +55,11 @@ def init_table(table_name):
                 new_device.bluetooth_connected = []
             if device[11] != "":
                 new_device.bluetooth_connection_limit = int(device[11])
-        new_device.vulnerabilities = device[7].split(", ")
+        new_device_vulnerabilities = device[7].split(", ")
+        if new_device_vulnerabilities[0].strip() == "":
+            new_device_vulnerabilities = []
+        for vulnerability in new_device_vulnerabilities:
+            new_device.set_vulnerability(vulnerability)
         environment += [new_device]
     for device in environment:
         if type(device) in [Computer, Server, Phone, Laptop]:
@@ -112,7 +116,7 @@ def exit_program():
                     device_bluetooth_limit = device.bluetooth_connection_limit
             else:
                 device_bluetooth = ""
-            device_vulnerabilities = ", ".join(device.vulnerabilities)
+            device_vulnerabilities = ", ".join([vulnerability.name for vulnerability in device.vulnerabilities])
             sql = """INSERT INTO {}(device, name, usb, lan, remote, bluetooth, vulnerabilities, usb_limit, lan_limit,
             remote_limit, bluetooth_limit)
             VALUES(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\");""".format(
@@ -280,7 +284,7 @@ def print_devices():
             device_bluetooth = ", ".join([conn_device.name for conn_device in device.bluetooth_connected])
         else:
             device_bluetooth = ""
-        device_vulnerabilities = ", ".join(device.vulnerabilities)
+        device_vulnerabilities = ", ".join([vulnerability.name for vulnerability in device.vulnerabilities])
         print("------------------------------------")
         print(f"Type: {device_type}")
         print(f"Name: {device.name}")
@@ -308,6 +312,15 @@ def configure(set_device):
         if check_name(set_device[2]):
             return 9
         return cur_device.set_name(set_device[2])
+    elif set_device[1] in "vulnerability":
+        if len(set_device) < 4:
+            return 10
+        if set_device[2] == "add":
+            return cur_device.set_vulnerability(set_device[3])
+        elif set_device[2] == "del":
+            return cur_device.del_vulnerability(set_device[3])
+        else:
+            return 13
     elif set_device[1] in ["usb", "lan", "bluetooth", "remote"]:
         if len(set_device) < 4:
             return 10

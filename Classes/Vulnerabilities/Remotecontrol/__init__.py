@@ -1,11 +1,6 @@
-from ...Server import Server
-from ...Computer import Computer
-from ...Laptop import Laptop
-
-
 class RemoteControl:
     def __init__(self):
-        self.devices = [Server, Computer, Laptop]
+        self.devices = ["Server", "Computer", "Laptop"]
         self.name = "RemoteControl"
 
     def do(self, device, command):

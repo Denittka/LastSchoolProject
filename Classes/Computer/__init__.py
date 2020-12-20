@@ -2,7 +2,7 @@ from ..Device import Device
 from ..LAN import LAN
 from ..USB import USB
 from ..Packet import Packet
-from threading import Thread
+
 
 class Computer(Device, LAN, USB):
     def __init__(self):

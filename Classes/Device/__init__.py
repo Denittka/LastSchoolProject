@@ -1,3 +1,8 @@
+from ..Vulnerabilities.Remotecontrol import RemoteControl
+from ..Vulnerabilities.Criticalerror import CriticalError
+from ..Vulnerabilities.Phpinjection import PHPInjection
+from ..Vulnerabilities.Sqlinjection import SQLInjection
+
 class Device:
     """
     Базовый класс для всех устройств.
@@ -6,6 +11,28 @@ class Device:
         self.name = None
         self.powered = False
         self.vulnerabilities = []
+
+    def set_vulnerability(self, vulnerability):
+        if vulnerability == "remotecontrol":
+            vulnerability = RemoteControl()
+        elif vulnerability == "criticalerror":
+            vulnerability = CriticalError()
+        elif vulnerability == "phpinjection":
+            vulnerability = PHPInjection()
+        elif vulnerability == "sqlinjection":
+            vulnerability = SQLInjection()
+        else:
+            return 13
+        if str(type(self)).split(".")[-1][:-2] not in vulnerability.devices:
+            return 14
+        self.vulnerabilities += [vulnerability]
+        return 0
+
+    def del_vulnerability(self, vulnerability):
+        if vulnerability not in self.vulnerabilities:
+            return 14
+        del self.vulnerabilities[self.vulnerabilities.index(vulnerbility)]
+        return 0
 
     def set_name(self, name):
         if self.name == name:
