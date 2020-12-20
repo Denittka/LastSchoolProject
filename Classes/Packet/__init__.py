@@ -7,4 +7,3 @@ class Packet:
 
     def add_to_trace(self, address):
         self.trace += [address]
-

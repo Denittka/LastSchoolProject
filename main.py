@@ -392,7 +392,7 @@ def get_result(code):
     elif code == 15:
         return "Неверный тип устройства"
     elif code == 16:
-        return "Устройство уже находилось в пути"
+        return "Устройство уже находилось в пути пакета"
 
 
 def connect(device):

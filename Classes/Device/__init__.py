@@ -3,6 +3,9 @@ from ..Vulnerabilities.Criticalerror import CriticalError
 from ..Vulnerabilities.Phpinjection import PHPInjection
 from ..Vulnerabilities.Sqlinjection import SQLInjection
 
+from ..Packet import Packet
+
+
 class Device:
     """
     Базовый класс для всех устройств.
@@ -70,6 +73,3 @@ class Device:
             return [16, packet]
         packet.add_to_trace(self.name)
         return self.send(packet.to_address, packet=packet)
-
-    def do(self, command):
-        pass
