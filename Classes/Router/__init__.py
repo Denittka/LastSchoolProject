@@ -15,7 +15,7 @@ class Router(Device, LAN, Remote):
     def send(self, to_address, data=None, packet=None):
         if data is not None and packet is None:
             packet = Packet(to_address, self.name, data)
-            packet.add_to_trace(self.name)
+            packet.add_to_trace(self)
         sent = []
         for device in self.local_connected:
             if device in sent or device in packet.trace:

@@ -67,11 +67,11 @@ class Device:
         pass
 
     def receive(self, from_address, packet):
+        if self in packet.trace:
+            return [16, packet]
+        packet.add_to_trace(self)
         if packet.to_address == self.name:
             return [self.do(packet.data, packet), packet]
-        if self.name in packet.trace:
-            return [16, packet]
-        packet.add_to_trace(self.name)
         return self.send(packet.to_address, packet=packet)
 
     def do(self, command, packet):
@@ -83,6 +83,7 @@ class Device:
                 return 0
             else:
                 print(" ".join(command[1:]))
+                return 0
         if command[0] == "send":
             if command[2] == "type":
                 result = str(type(self)).split(".")[-1][:-2]

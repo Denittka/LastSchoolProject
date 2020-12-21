@@ -5,6 +5,7 @@ from Classes.Phone import Phone
 from Classes.Router import Router
 from Classes.Server import Server
 from Classes.TV import TV
+from Classes.Packet import Packet
 import sqlite3
 
 
@@ -20,16 +21,43 @@ def analyze():
     for testing_device in environment:
         print("Тестирование устройства", testing_device.name)
         if testing_device.name == device.name or testing_device.name in net:
-            print("Статус: подключено")
             continue
         result = device.send(testing_device.name, data=f"send {device.name} type")
         for to_add_device in result[1].trace[1:]:
-            if to_add_device not in net:
+            if to_add_device not in net and to_add_device != device:
                 net += [to_add_device]
-        print("Статус: подключено" if result[0] == 0 else "Статус: не подключено")
+        print("Статус: подключено" if find_result(result[0]) == 0 else "Статус: не подключено")
     print("----------------------------------")
     allowed = check_allowed(device, net)
-    print(allowed)
+    print("Устройства, доступные по удалённому доступу:")
+    if len(allowed) > 0:
+        for num, testing_device in enumerate(allowed):
+            print(f"{num + 1}. {testing_device.name} - {str(type(testing_device)).split('.')[-1][:-2]}")
+    for server in list(filter(lambda x: str(type(x)).split(".")[-1][:-2] == "Server", net + [device])):
+        if "PHPInjection" in [v.name for v in server.vulnerabilities] \
+                and "SQLInjection" in [v.name for v in server.vulnerabilities]:
+            print("Данные под угрозой на сервере:", server.name)
+    for server in list(filter(lambda x: str(type(x)).split(".")[-1][:-2] == "Server", allowed + [device])):
+        if "SQLInjection" in [v.name for v in server.vulnerabilities]:
+            print("Данные под угрозой на сервере:", server.name)
+    for testing_device in allowed + [device]:
+        sql_server = False
+        web_server = False
+        for to_connect_device in net + [device]:
+            if to_connect_device.name == testing_device.name:
+                continue
+            testing_packet = Packet(to_connect_device.name, testing_device.name, f"send {testing_device} 1")
+            for router in list(filter(lambda x: str(type(x)).split(".")[-1][:-2] == "Router", net)):
+                testing_packet.trace += [router]
+            result = testing_device.send(to_connect_device.name, packet=testing_packet)
+            if find_result(result) == 0 or find_result(result) == 13:
+                if "PHPInjection" in [v.name for v in to_connect_device.vulnerabilities]:
+                    web_server = to_connect_device
+                if "SQLInjection" in [v.name for v in to_connect_device.vulnerabilities]:
+                    sql_server = to_connect_device
+        if web_server and sql_server:
+            print(f"Данные могут считываться во время передачи данных между SQL-сервером {sql_server.name} и",
+                  f"WEB-сервером {web_server.name}")
     # if type(device) in [Computer, Laptop, Router, Server]:
     #     for device in self.local_connected
     # if type(device) in [Computer, Phone, Server]:
@@ -41,10 +69,18 @@ def analyze():
     return 0
 
 
+def find_result(got):
+    while True:
+        if isinstance(got[0], list):
+            return find_result(got[0])
+        else:
+            return got[0]
+
+
 def check_allowed(device, net):
     allowed = []
     for testing_device in net:
-        testing_device = get_device(testing_device)
+        testing_device = testing_device
         if "RemoteControl" in [v.name for v in testing_device.vulnerabilities]:
             ct = testing_device.vulnerabilities[[v.name for v in testing_device.vulnerabilities].index("RemoteControl")]
             if device.name in ct.allowed:
