@@ -26,7 +26,7 @@ def analyze():
         for to_add_device in result[1].trace[1:]:
             if to_add_device not in net and to_add_device != device:
                 net += [to_add_device]
-        print("Статус: подключено" if find_result(result[0]) == 0 else "Статус: не подключено")
+        print("Статус: подключено" if find_result(result) == 0 else "Статус: не подключено")
     print("----------------------------------")
     allowed = check_allowed(device, net)
     print("Устройства, доступные по удалённому доступу:")
